@@ -54,4 +54,32 @@ export class ShoeController {
       .status(200)
       .json(new ApiResponse(200, result, "Shoe fetched successfully"));
   });
+
+  deleteShoe = asyncHandler(async (req: Request, res: Response) => {
+    const modelNumber = req.params.modelNumber as string;
+
+    if (!modelNumber) {
+      throw new ApiError(400, "Model number is required");
+    }
+
+    const result = await shoeService.deleteShoe(modelNumber);
+
+    return res
+      .status(200)
+      .json(new ApiResponse(200, result, "shoe deleted successfully"));
+  });
+
+  updateShoe = asyncHandler(async (req: Request, res: Response) => {
+    const modelNumber = req.params.modelNumber as string;
+
+    if (!modelNumber) {
+      throw new ApiError(400, "Model number is required");
+    }
+
+    const result = await shoeService.updateShoe(req.body, modelNumber);
+
+    return res
+      .status(200)
+      .json(new ApiResponse(200, result, "shoe updated successfully"));
+  });
 }

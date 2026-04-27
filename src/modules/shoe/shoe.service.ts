@@ -2,6 +2,7 @@ import { AppDataSource } from "../../config/db/db";
 import { Shoe } from "../../entities/shoes";
 import { ApiError } from "../../utils/ApiError";
 import { CreateShoeDTO } from "./dto/index";
+import { UpdateShoeDTO } from "./dto/update-shoe-dto";
 
 const shoeRepository = AppDataSource.getRepository(Shoe);
 
@@ -74,5 +75,43 @@ export class ShoeService {
       throw new ApiError(400, "shoe Id is requied");
     }
     return shoe;
+  }
+
+  async deleteShoe(modelNumber: string) {
+    const shoe = await shoeRepository.findOne({
+      where: { modelNumber },
+    });
+
+    if (!shoe) {
+      throw new ApiError(404, "No shoe with that model number");
+    }
+
+    await shoeRepository.delete({ modelNumber: shoe.modelNumber });
+  }
+
+  async updateShoe(dto: UpdateShoeDTO, modelNumber: string) {
+    const shoe = await shoeRepository.findOne({
+      where: { modelNumber },
+    });
+
+    if (!shoe) {
+      throw new ApiError(403, "Shoe not Found");
+    }
+
+    await shoeRepository.update(
+      { modelNumber },
+      {
+        brand: dto.brand,
+        name: dto.name,
+        description: dto.description,
+        manufactureAt: dto.manufactureAt,
+      },
+    );
+
+    const updatedShoe = await shoeRepository.findOne({
+      where: { modelNumber },
+    });
+
+    return updatedShoe;
   }
 }

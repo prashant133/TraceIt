@@ -38,4 +38,18 @@ router.get(
   shoeController.getSingleShoeById,
 );
 
+router.delete(
+  "/:modelNumber",
+  authMiddleware,
+  checkRole(Role.ADMIN),
+  shoeController.deleteShoe,
+);
+
+router.put(
+  "/:modelNumber",
+  authMiddleware,
+  checkRole(Role.ADMIN),
+  shoeController.updateShoe,
+);
+
 export default router;
