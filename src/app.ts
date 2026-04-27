@@ -3,9 +3,10 @@ import express from "express";
 import * as dotenv from "dotenv";
 import { notFound } from "./middlewares/notFound";
 import { errorMiddleware } from "./middlewares/errorMiddleware";
+import cookieParser from "cookie-parser";
 import authRoutes from "./modules/auth/auth.route";
 import otpRoutes from "./modules/otp/otp.route";
-import cookieParser from "cookie-parser";
+import shoeRoutes from "./modules/shoe/shoe.route";
 
 dotenv.config();
 
@@ -16,6 +17,7 @@ app.use(cookieParser());
 
 app.use("/api/auth", authRoutes);
 app.use("/api/otp", otpRoutes);
+app.use("/api/shoe", shoeRoutes);
 
 // middleware
 app.use(notFound);
