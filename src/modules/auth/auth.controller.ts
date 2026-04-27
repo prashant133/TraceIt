@@ -13,4 +13,12 @@ export class AuthController {
       .status(201)
       .json(new ApiResponse(201, result, "User created successfully"));
   });
+
+  login = asyncHandler(async (req: Request, res: Response) => {
+    const result = await authService.login(req.body);
+
+    return res
+      .status(200)
+      .json(new ApiResponse(200, result, "Loggged in succussfully"));
+  });
 }

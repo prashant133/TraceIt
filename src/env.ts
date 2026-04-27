@@ -13,10 +13,13 @@ const {
   MAIL_PORT,
   MAIL_USER,
   MAIL_PASS,
+  JWT_ACCESS_SECRET,
+  JWT_REFRESH_SECRET,
+  // NODE_ENV,
 } = process.env;
 
 if (
-  !PORT||
+  !PORT ||
   !DB_HOST ||
   !DB_PORT ||
   !DB_USERNAME ||
@@ -25,7 +28,10 @@ if (
   !MAIL_HOST ||
   !MAIL_PORT ||
   !MAIL_USER ||
-  !MAIL_PASS
+  !MAIL_PASS ||
+  !JWT_ACCESS_SECRET ||
+  !JWT_REFRESH_SECRET 
+  // !NODE_ENV
 ) {
   throw new Error("Missing required environment variables");
 }
@@ -41,4 +47,7 @@ export const env = {
   MAIL_PORT,
   MAIL_USER,
   MAIL_PASS,
+  JWT_ACCESS_SECRET,
+  JWT_REFRESH_SECRET,
+  // NODE_ENV,
 };
