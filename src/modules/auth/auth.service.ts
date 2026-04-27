@@ -4,13 +4,14 @@ import { User } from "../../entities/users";
 import { ApiError } from "../../utils/ApiError";
 import { sendOTPEmail } from "../../utils/emailConfig";
 import { generateOtp } from "../../utils/generateOtp";
-import { RegisterDTO } from "./dto/index";
+import { RegisterDTO, LoginDTO } from "./dto/index";
 import * as bcrypt from "bcrypt";
-import { LoginDTO } from "./dto/login.dto";
 import {
   generateAccessToken,
   generateRefreshToken,
 } from "../../utils/generateToken";
+import * as jwt from "jsonwebtoken";
+import { env } from "../../env";
 
 const userRepository = AppDataSource.getRepository(User);
 
@@ -71,6 +72,9 @@ export class AuthService {
     const accessToken = await generateAccessToken(user.id);
     const refreshToken = await generateRefreshToken(user.id);
 
+    const hashedRefreshToken = await bcrypt.hash(refreshToken, 10);
+    user.refreshToken = hashedRefreshToken;
+
     await userRepository.save(user);
 
     return {
@@ -83,5 +87,64 @@ export class AuthService {
         isEmailVerified: user.isEmailVerified,
       },
     };
+  }
+
+  async logout(userId: string) {
+    const user = await userRepository.findOne({
+      where: { id: userId },
+    });
+
+    if (!user) {
+      throw new ApiError(404, "User not Found");
+    }
+
+    user.refreshToken = null;
+
+    userRepository.save(user);
+
+    return {
+      message: "Logged out successfully",
+    };
+  }
+
+  async refreshToken(token: string) {
+    const decoded = (await jwt.verify(token, env.JWT_REFRESH_SECRET)) as {
+      id: string;
+    };
+
+    const user = await userRepository.findOne({
+      where: { id: decoded.id },
+    });
+
+    if (!user) {
+      throw new ApiError(404, "No user Found");
+    }
+
+    if (!user.refreshToken) {
+      throw new ApiError(401, "Unauthorized - Please login again");
+    }
+
+    const isValid = await bcrypt.compare(token, user.refreshToken);
+    if (!isValid) {
+      throw new ApiError(401, "Unauthorized - Invalid refresh token");
+    }
+
+    const accessToken = await generateAccessToken(user.id);
+
+    return { accessToken };
+  }
+
+  async getCurrentUser(userId: string) {
+    const user = await userRepository.findOne({
+      where: {
+        id: userId,
+      },
+    });
+
+    if (!user) {
+      throw new ApiError(404, "User not found");
+    }
+
+    return user;
   }
 }

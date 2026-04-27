@@ -5,12 +5,14 @@ import { notFound } from "./middlewares/notFound";
 import { errorMiddleware } from "./middlewares/errorMiddleware";
 import authRoutes from "./modules/auth/auth.route";
 import otpRoutes from "./modules/otp/otp.route";
+import cookieParser from "cookie-parser";
 
 dotenv.config();
 
 const app = express();
 
 app.use(express.json());
+app.use(cookieParser());
 
 app.use("/api/auth", authRoutes);
 app.use("/api/otp", otpRoutes);

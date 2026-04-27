@@ -1,6 +1,6 @@
 import express from "express";
 import { validateDto } from "../../utils/validator";
-import { VerifyEmailDTO } from "./dto";
+import { ForgotPasswordDTO, ResetPasswordDTO, VerifyEmailDTO } from "./dto";
 import { OTPController } from "./otp.controller";
 
 const router = express.Router();
@@ -13,4 +13,15 @@ router.post(
   otpController.verifyEmail,
 );
 
+router.post(
+  "/forgot-password",
+  validateDto(ForgotPasswordDTO),
+  otpController.forgotPassword,
+);
+
+router.post(
+  "/reset-password",
+  validateDto(ResetPasswordDTO),
+  otpController.resetPassword,
+);
 export default router;
