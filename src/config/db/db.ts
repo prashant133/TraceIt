@@ -5,6 +5,7 @@ import { User } from "../../entities/users";
 import { Otp } from "../../entities/otps";
 import { Shoe } from "../../entities/shoes";
 import { Purchase } from "../../entities/purchases";
+import { AuditLog } from "../../entities/audiit-log";
 
 export const AppDataSource = new DataSource({
   type: "postgres",
@@ -15,6 +16,6 @@ export const AppDataSource = new DataSource({
   database: env.DB_NAME,
 
   synchronize: false,
-  entities: [User, Otp,Shoe,Purchase],
+  entities: [User, Otp, Shoe, Purchase, AuditLog],
   migrations: [__dirname + "/../../migrations/*.{ts,js}"],
 });

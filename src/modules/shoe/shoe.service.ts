@@ -1,9 +1,10 @@
 import { AppDataSource } from "../../config/db/db";
-import { OTPType } from "../../constants";
+import { AuditAction, OTPType } from "../../constants";
 import { Purchase } from "../../entities/purchases";
 import { Shoe } from "../../entities/shoes";
 import { User } from "../../entities/users";
 import { ApiError } from "../../utils/ApiError";
+import { createAuditLogs } from "../../utils/auditLogs";
 import { sendOTPEmail } from "../../utils/emailConfig";
 import { generateOtp } from "../../utils/generateOtp";
 import { uploadImage } from "../../utils/uploadImage";
@@ -38,6 +39,13 @@ export class ShoeService {
     });
 
     await shoeRepository.save(shoe);
+
+    await createAuditLogs(AuditAction.SHOE_CREATED, "Shoe", shoe.id, userId, {
+      modelNumber: shoe.modelNumber,
+      brand: shoe.brand,
+      name: shoe.name,
+      message: "Shoe created successfully",
+    });
 
     return shoe;
   }
@@ -88,7 +96,7 @@ export class ShoeService {
     return shoe;
   }
 
-  async deleteShoe(modelNumber: string) {
+  async deleteShoe(modelNumber: string, userId: string) {
     const shoe = await shoeRepository.findOne({
       where: { modelNumber },
     });
@@ -98,9 +106,16 @@ export class ShoeService {
     }
 
     await shoeRepository.delete({ modelNumber: shoe.modelNumber });
+
+    await createAuditLogs(AuditAction.SHOE_DELETED, "Shoe", shoe.id, userId, {
+      modelNumber: shoe.modelNumber,
+      brand: shoe.brand,
+      name: shoe.name,
+      message: "Shoe created successfully",
+    });
   }
 
-  async updateShoe(dto: UpdateShoeDTO, modelNumber: string) {
+  async updateShoe(dto: UpdateShoeDTO, modelNumber: string, userId: string) {
     const shoe = await shoeRepository.findOne({
       where: { modelNumber },
     });
@@ -121,6 +136,13 @@ export class ShoeService {
 
     const updatedShoe = await shoeRepository.findOne({
       where: { modelNumber },
+    });
+
+    await createAuditLogs(AuditAction.SHOE_UPDATED, "Shoe", shoe.id, userId, {
+      modelNumber: shoe.modelNumber,
+      brand: shoe.brand,
+      name: shoe.name,
+      message: "Shoe updated successfully",
     });
 
     return updatedShoe;

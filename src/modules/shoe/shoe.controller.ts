@@ -66,7 +66,7 @@ export class ShoeController {
       throw new ApiError(400, "Model number is required");
     }
 
-    const result = await shoeService.deleteShoe(modelNumber);
+    const result = await shoeService.deleteShoe(modelNumber, req.user!.id);
 
     return res
       .status(200)
@@ -80,7 +80,11 @@ export class ShoeController {
       throw new ApiError(400, "Model number is required");
     }
 
-    const result = await shoeService.updateShoe(req.body, modelNumber);
+    const result = await shoeService.updateShoe(
+      req.body,
+      modelNumber,
+      req.user!.id,
+    );
 
     return res
       .status(200)

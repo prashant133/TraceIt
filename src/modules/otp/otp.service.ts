@@ -1,5 +1,5 @@
 import { AppDataSource } from "../../config/db/db";
-import { OTPType } from "../../constants";
+import { AuditAction, OTPType } from "../../constants";
 import { Otp } from "../../entities/otps";
 import { Shoe } from "../../entities/shoes";
 import { User } from "../../entities/users";
@@ -14,6 +14,7 @@ import {
 
 import * as bcrypt from "bcrypt";
 import { ViewShoeDTO } from "./dto/view-shoe-dto";
+import { createAuditLogs } from "../../utils/auditLogs";
 
 const otpRepository = AppDataSource.getRepository(Otp);
 const userRepository = AppDataSource.getRepository(User);
@@ -43,6 +44,16 @@ export class OTPService {
     otp.user.isEmailVerified = true;
 
     await userRepository.save(otp.user);
+    await createAuditLogs(
+      AuditAction.EMAIL_VERIFIED,
+      "OTP",
+      otp.user.id,
+      otp.user.id,
+      {
+        email: otp.user.email,
+        fullName: otp.user.fullName,
+      },
+    );
   }
 
   async forgotPassword(dto: ForgotPasswordDTO) {
@@ -101,6 +112,17 @@ export class OTPService {
 
     await userRepository.save(otp.user);
 
+    createAuditLogs(
+      AuditAction.PASSWORD_RESET,
+      "OTP",
+      otp.user.id,
+      otp.user.id,
+      {
+        email: otp.user.email,
+        fullName: otp.user.fullName,
+      },
+    );
+
     return {
       message: "Password reset successfully",
     };
@@ -130,6 +152,18 @@ export class OTPService {
 
     otp.isUsed = true;
     await otpRepository.save(otp);
+
+
+    createAuditLogs(
+      AuditAction.SHOE_VIEWED,
+      "OTP",
+      otp.user.id,
+      otp.user.id,
+      {
+        email: otp.user.email,
+        fullName: otp.user.fullName,
+      },
+    );
 
     //  shoe details
     const shoe = await AppDataSource.getRepository(Shoe).findOne({

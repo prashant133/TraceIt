@@ -1,5 +1,5 @@
 import { AppDataSource } from "../../config/db/db";
-import { OTPType } from "../../constants";
+import { AuditAction, OTPType } from "../../constants";
 import { User } from "../../entities/users";
 import { ApiError } from "../../utils/ApiError";
 import { sendOTPEmail } from "../../utils/emailConfig";
@@ -12,6 +12,7 @@ import {
 } from "../../utils/generateToken";
 import * as jwt from "jsonwebtoken";
 import { env } from "../../env";
+import { createAuditLogs } from "../../utils/auditLogs";
 
 const userRepository = AppDataSource.getRepository(User);
 
@@ -34,6 +35,18 @@ export class AuthService {
     });
 
     await userRepository.save(user);
+
+    await createAuditLogs(
+      AuditAction.USER_REGISTERED,
+      "User",
+      user.id,
+      user.id,
+      {
+        email: user.email,
+        fullName: user.fullName,
+        message: "User Registered succesfully",
+      },
+    );
 
     const code = await generateOtp(user, OTPType.EMAIL_VERIFY);
 
@@ -81,6 +94,18 @@ export class AuthService {
 
     await userRepository.save(user);
 
+    await createAuditLogs(
+      AuditAction.USER_LOGGED_IN,
+      "User",
+      user.id,
+      user.id,
+      {
+        email: user.email,
+        fullName: user.fullName,
+        message: "User Logged in successfuly",
+      },
+    );
+
     return {
       accessToken,
       refreshToken,
@@ -105,6 +130,18 @@ export class AuthService {
     user.refreshToken = null;
 
     userRepository.save(user);
+
+    await createAuditLogs(
+      AuditAction.USER_LOGGED_OUT,
+      "User",
+      user.id,
+      user.id,
+      {
+        email: user.email,
+        fullName: user.fullName,
+        messag: "User Logged out successfully",
+      },
+    );
 
     return {
       message: "Logged out successfully",
@@ -147,6 +184,11 @@ export class AuthService {
       where: {
         id: userId,
       },
+    });
+
+    createAuditLogs(AuditAction.GET_CURRENT_USER, "User", userId, userId, {
+      email: user?.email,
+      fullName: user?.fullName,
     });
 
     if (!user) {
