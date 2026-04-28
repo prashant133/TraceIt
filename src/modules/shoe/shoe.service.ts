@@ -5,6 +5,7 @@ import { Shoe } from "../../entities/shoes";
 import { User } from "../../entities/users";
 import { ApiError } from "../../utils/ApiError";
 import { createAuditLogs } from "../../utils/auditLogs";
+import { deleteImageFromCloudinary } from "../../utils/deleteImage";
 import { sendOTPEmail } from "../../utils/emailConfig";
 import { generateOtp } from "../../utils/generateOtp";
 import { uploadImage } from "../../utils/uploadImage";
@@ -107,6 +108,11 @@ export class ShoeService {
 
     await shoeRepository.delete({ modelNumber: shoe.modelNumber });
 
+    if (!shoe.imageUrl) {
+      throw new ApiError(404, "No Image url");
+    }
+    await deleteImageFromCloudinary(shoe.imageUrl);
+
     await createAuditLogs(AuditAction.SHOE_DELETED, "Shoe", shoe.id, userId, {
       modelNumber: shoe.modelNumber,
       brand: shoe.brand,
@@ -114,14 +120,28 @@ export class ShoeService {
       message: "Shoe created successfully",
     });
   }
-
-  async updateShoe(dto: UpdateShoeDTO, modelNumber: string, userId: string) {
+  async updateShoe(
+    dto: UpdateShoeDTO,
+    modelNumber: string,
+    userId: string,
+    filePath?: string,
+  ) {
     const shoe = await shoeRepository.findOne({
       where: { modelNumber },
     });
 
     if (!shoe) {
-      throw new ApiError(403, "Shoe not Found");
+      throw new ApiError(403, "Shoe not found");
+    }
+
+    let newImageUrl = shoe.imageUrl;
+
+    if (filePath) {
+      if (shoe.imageUrl) {
+        await deleteImageFromCloudinary(shoe.imageUrl);
+      }
+
+      newImageUrl = await uploadImage(filePath);
     }
 
     await shoeRepository.update(
@@ -131,6 +151,7 @@ export class ShoeService {
         name: dto.name,
         description: dto.description,
         manufactureAt: dto.manufactureAt,
+        imageUrl: newImageUrl,
       },
     );
 

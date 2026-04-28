@@ -84,6 +84,7 @@ export class ShoeController {
       req.body,
       modelNumber,
       req.user!.id,
+      req.file?.path,
     );
 
     return res

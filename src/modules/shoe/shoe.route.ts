@@ -52,6 +52,7 @@ router.put(
   "/:modelNumber",
   authMiddleware,
   checkRole(Role.ADMIN),
+  upload.single("image"),
   shoeController.updateShoe,
 );
 
