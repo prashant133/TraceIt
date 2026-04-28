@@ -31,4 +31,11 @@ export class OTPController {
       .status(200)
       .json(new ApiResponse(200, result, "Password reset successfully"));
   });
+
+  viewShoe = asyncHandler(async (req: Request, res: Response) => {
+    const result = await otpService.viewShoe(req.body);
+    return res
+      .status(200)
+      .json(new ApiResponse(200, result, "Shoe details fetched successfully"));
+  });
 }

@@ -2,9 +2,11 @@ import { Router } from "express";
 import { ShoeController } from "./shoe.controller";
 import { authMiddleware } from "../../middlewares/authMiddleware";
 import { checkRole } from "../../middlewares/roleMiddliware";
-import { CreateShoeDTO } from "./dto/index";
+import { CreateShoeDTO, VerifyShoeDTO } from "./dto/index";
 import { validateDto } from "../../utils/validator";
 import { Role } from "../../constants";
+import { otpRateLimit } from "../../middlewares/rateLimiter";
+import { upload } from "../../config/multer";
 
 const router = Router();
 
@@ -14,6 +16,7 @@ router.post(
   "/",
   authMiddleware,
   checkRole(Role.ADMIN),
+  upload.single("image"),
   validateDto(CreateShoeDTO),
   shoeController.createShoe,
 );
@@ -50,6 +53,14 @@ router.put(
   authMiddleware,
   checkRole(Role.ADMIN),
   shoeController.updateShoe,
+);
+
+router.post(
+  "/verify",
+  authMiddleware,
+  otpRateLimit,
+  validateDto(VerifyShoeDTO),
+  shoeController.verifyShoe,
 );
 
 export default router;

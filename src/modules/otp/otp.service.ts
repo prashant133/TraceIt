@@ -1,6 +1,7 @@
 import { AppDataSource } from "../../config/db/db";
 import { OTPType } from "../../constants";
 import { Otp } from "../../entities/otps";
+import { Shoe } from "../../entities/shoes";
 import { User } from "../../entities/users";
 import { ApiError } from "../../utils/ApiError";
 import { sendOTPEmail } from "../../utils/emailConfig";
@@ -12,6 +13,7 @@ import {
 } from "./dto/index";
 
 import * as bcrypt from "bcrypt";
+import { ViewShoeDTO } from "./dto/view-shoe-dto";
 
 const otpRepository = AppDataSource.getRepository(Otp);
 const userRepository = AppDataSource.getRepository(User);
@@ -102,5 +104,42 @@ export class OTPService {
     return {
       message: "Password reset successfully",
     };
+  }
+
+  async viewShoe(dto: ViewShoeDTO) {
+    const otp = await otpRepository.findOne({
+      where: { otpCode: dto.code, type: OTPType.VIEW_SHOE, isUsed: false },
+      relations: ["user"],
+    });
+
+    if (!otp) {
+      throw new ApiError(404, "No otp Found");
+    }
+
+    if (otp.isUsed) {
+      throw new ApiError(400, "OTP is used");
+    }
+
+    if (new Date() > otp.expiresAt) {
+      throw new ApiError(400, "OTP has expired");
+    }
+
+    if (!otp.shoeId) {
+      throw new ApiError(400, "Invalid OTP");
+    }
+
+    otp.isUsed = true;
+    await otpRepository.save(otp);
+
+    //  shoe details
+    const shoe = await AppDataSource.getRepository(Shoe).findOne({
+      where: { id: otp.shoeId! },
+    });
+
+    if (!shoe) {
+      throw new ApiError(404, "Shoe not found");
+    }
+
+    return shoe;
   }
 }

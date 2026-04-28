@@ -16,6 +16,10 @@ const {
   JWT_ACCESS_SECRET,
   JWT_REFRESH_SECRET,
   NODE_ENV,
+  REDIS_URL,
+  CLOUDINARY_CLOUD_NAME,
+  CLOUDINARY_API_KEY,
+  CLOUDINARY_API_SECRET,
 } = process.env;
 
 if (
@@ -30,8 +34,12 @@ if (
   !MAIL_USER ||
   !MAIL_PASS ||
   !JWT_ACCESS_SECRET ||
-  !JWT_REFRESH_SECRET  ||
-  !NODE_ENV
+  !JWT_REFRESH_SECRET ||
+  !NODE_ENV ||
+  !REDIS_URL ||
+  !CLOUDINARY_CLOUD_NAME ||
+  !CLOUDINARY_API_KEY ||
+  !CLOUDINARY_API_SECRET
 ) {
   throw new Error("Missing required environment variables");
 }
@@ -50,4 +58,8 @@ export const env = {
   JWT_ACCESS_SECRET,
   JWT_REFRESH_SECRET,
   NODE_ENV,
+  REDIS_URL,
+  CLOUDINARY_CLOUD_NAME,
+  CLOUDINARY_API_KEY,
+  CLOUDINARY_API_SECRET,
 };

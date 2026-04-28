@@ -69,7 +69,11 @@ export class AuthService {
     }
     user.loginAttempts = 0;
 
-    const accessToken = await generateAccessToken(user.id);
+    const accessToken = await generateAccessToken(
+      user.id,
+      user.role,
+      user.fullName,
+    );
     const refreshToken = await generateRefreshToken(user.id);
 
     const hashedRefreshToken = await bcrypt.hash(refreshToken, 10);
@@ -129,7 +133,11 @@ export class AuthService {
       throw new ApiError(401, "Unauthorized - Invalid refresh token");
     }
 
-    const accessToken = await generateAccessToken(user.id);
+    const accessToken = await generateAccessToken(
+      user.id,
+      user.role,
+      user.fullName,
+    );
 
     return { accessToken };
   }

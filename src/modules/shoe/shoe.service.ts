@@ -1,13 +1,18 @@
 import { AppDataSource } from "../../config/db/db";
+import { OTPType } from "../../constants";
+import { Purchase } from "../../entities/purchases";
 import { Shoe } from "../../entities/shoes";
+import { User } from "../../entities/users";
 import { ApiError } from "../../utils/ApiError";
-import { CreateShoeDTO } from "./dto/index";
-import { UpdateShoeDTO } from "./dto/update-shoe-dto";
+import { sendOTPEmail } from "../../utils/emailConfig";
+import { generateOtp } from "../../utils/generateOtp";
+import { uploadImage } from "../../utils/uploadImage";
+import { CreateShoeDTO, UpdateShoeDTO, VerifyShoeDTO } from "./dto/index";
 
 const shoeRepository = AppDataSource.getRepository(Shoe);
 
 export class ShoeService {
-  async createShoe(dto: CreateShoeDTO, userId: string) {
+  async createShoe(dto: CreateShoeDTO, userId: string, filePath?: string) {
     const existingShoe = await shoeRepository.findOne({
       where: {
         modelNumber: dto.modelNumber,
@@ -17,12 +22,18 @@ export class ShoeService {
       throw new ApiError(403, "Shoe with this model number exists");
     }
 
+    let imageUrl: string | null = null;
+    if (filePath) {
+      imageUrl = await uploadImage(filePath);
+    }
+
     const shoe = shoeRepository.create({
       modelNumber: dto.modelNumber,
       brand: dto.brand,
       name: dto.name,
       description: dto.description,
       manufactureAt: new Date(dto.manufactureAt),
+      imageUrl,
       createdBy: { id: userId },
     });
 
@@ -113,5 +124,39 @@ export class ShoeService {
     });
 
     return updatedShoe;
+  }
+
+  async verifyShoe(dto: VerifyShoeDTO, userId: string) {
+    const shoe = await shoeRepository.findOne({
+      where: { modelNumber: dto.modelNumber },
+    });
+
+    if (!shoe) {
+      throw new ApiError(404, "Shoe not found");
+    }
+
+    const purchase = await AppDataSource.getRepository(Purchase).findOne({
+      where: {
+        user: { id: userId },
+        shoe: { id: shoe.id },
+      },
+      relations: ["user"],
+    });
+
+    if (!purchase) {
+      throw new ApiError(403, "You have not purchased this shoe");
+    }
+
+    const code = await generateOtp(
+      { id: userId } as User,
+      OTPType.VIEW_SHOE,
+      shoe.id,
+    );
+
+    await sendOTPEmail(purchase.user.email, code, OTPType.VIEW_SHOE);
+
+    return {
+      message: "Otp Sent you your email",
+    };
   }
 }

@@ -9,7 +9,11 @@ const shoeService = new ShoeService();
 
 export class ShoeController {
   createShoe = asyncHandler(async (req: Request, res: Response) => {
-    const result = await shoeService.createShoe(req.body, req.user!.id);
+    const result = await shoeService.createShoe(
+      req.body,
+      req.user!.id,
+      req.file!.path,
+    );
 
     return res
       .status(200)
@@ -81,5 +85,13 @@ export class ShoeController {
     return res
       .status(200)
       .json(new ApiResponse(200, result, "shoe updated successfully"));
+  });
+
+  verifyShoe = asyncHandler(async (req: Request, res: Response) => {
+    const result = await shoeService.verifyShoe(req.body, req.user!.id);
+
+    return res
+      .status(200)
+      .json(new ApiResponse(200, result, "OTP sent successfully"));
   });
 }

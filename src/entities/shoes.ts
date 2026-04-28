@@ -28,6 +28,9 @@ export class Shoe {
   @Column({ name: "manufactureAt", type: "timestamp" })
   manufactureAt!: Date;
 
+  @Column({ name: "fileUrl", type: "varchar", default: null })
+  imageUrl!: string | null;
+
   @ManyToOne(() => User, { onDelete: "CASCADE" })
   createdBy!: User;
 
