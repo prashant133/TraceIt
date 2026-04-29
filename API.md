@@ -262,17 +262,7 @@ POST /otp/view-shoe
       "description": "Classic Nike Air Max shoes",
       "manufactureAt": "2024-01-15T00:00:00.000Z",
       "imageUrl": "https://res.cloudinary.com/your-cloud/shoes/abc123.jpg"
-    },
-    "authenticity": {
-      "isAuthentic": true,
-      "reason": "This shoe is genuine and registered to you"
-    },
-    "warranty": {
-      "isActive": true,
-      "warrantyExpiresAt": "2025-01-15T00:00:00.000Z",
-      "remainingDays": 265,
-      "status": "Active ✅"
-    }
+    }, 
   }
 }
 ```
